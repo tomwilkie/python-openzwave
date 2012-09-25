@@ -13,7 +13,7 @@ make
 cd ../../../..
 
 echo "-----------------------------------------------------------------"
-echo "|   Build py-openzwave                                          |"
+echo "|   Build python-openzwave                                      |"
 echo "-----------------------------------------------------------------"
 python setup.py build
 
@@ -34,11 +34,12 @@ else
 fi
 
 echo "-----------------------------------------------------------------"
-echo "|   You can now install py-openzwave                            |"
+echo "|   You can now install python-openzwave                        |"
 echo "|   Run the following command                                   |"
-echo "|   sudo python setup.py install                                |"
+echo "|   sudo ./install.sh                                           |"
+echo "|   Installation directories :                                  |"
 echo "|   config directory : /usr/local/share/python-openzwave        |"
 if [ u != $(which sphinx-build)u ] ; then
-	echo "|   API documentation : /usr/local/share/doc/python-openzwave   |"
+	echo "|   Documentation : /usr/local/share/doc/python-openzwave       |"
 fi
 echo "-----------------------------------------------------------------"

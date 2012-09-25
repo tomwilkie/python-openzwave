@@ -110,7 +110,7 @@ class ZWaveNetwork(ZWaveObject):
     [potentially sent]  Sent after a node’s protocol information has been successfully read from the controller.
     At the time this notification is sent, only certain information about the node is known:
 
-        * Whether it is a “setening” or “sleeping” device
+        * Whether it is a “listening” or “sleeping” device
         * Whether the node is capable of routing messages
         * Maximum baud rate for communication
         * Version number
@@ -189,8 +189,8 @@ class ZWaveNetwork(ZWaveObject):
 
     STATE_STOPPED = 0
     STATE_FAILED = 1
-    STATE_INITIALISED = 2
-    STATE_RESET = 4
+    STATE_RESET = 3
+    STATE_INITIALISED = 5
     STATE_AWAKE = 7
     STATE_READY = 10
 
@@ -287,8 +287,8 @@ class ZWaveNetwork(ZWaveObject):
 
         * STATE_STOPPED = 0
         * STATE_FAILED = 1
-        * STATE_INITIALISED = 2
-        * STATE_RESET = 4
+        * STATE_RESET = 3
+        * STATE_INITIALISED = 5
         * STATE_AWAKE = 7
         * STATE_READY = 10
 
@@ -296,6 +296,25 @@ class ZWaveNetwork(ZWaveObject):
 
         """
         return self._state
+
+    @state.setter
+    def state(self, value):
+        """
+        The state of the network. Values may be changed in the future,
+        only order is important.
+
+        * STATE_STOPPED = 0
+        * STATE_FAILED = 1
+        * STATE_RESET = 3
+        * STATE_INITIALISED = 5
+        * STATE_AWAKE = 7
+        * STATE_READY = 10
+
+        :param value: new state
+        :type value: int
+
+        """
+        self._state = value
 
     @property
     def state_str(self):
@@ -886,7 +905,7 @@ class ZWaveNetwork(ZWaveObject):
 
     def _handle_error(self, args):
         '''
-        Called when a node query is complete.
+        Called when an error happened.
 
         :param args: data sent by the notification
         :type args: dict()
@@ -907,6 +926,18 @@ class ZWaveNetwork(ZWaveObject):
         logging.debug('Z-Wave Notification MsgComplete : %s' % (args))
         dispatcher.send(self.SIGNAL_MSG_COMPLETE, \
             **{'network': self})
+
+    def write_config(self):
+        '''
+        The last message that was sent is now complete.
+
+        :param args: data sent by the notification
+        :type args: dict()
+
+        '''
+        logging.debug('Write ZWave configuration.')
+        self._manager.writeConfig(self.home_id)
+        logging.info('ZWave configuration wrote to user directory.')
 
 #    def register_on_ready(self, callback):
 #        '''

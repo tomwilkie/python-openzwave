@@ -102,6 +102,7 @@ PyValueTypes = [
 
 """
 The log levels
+
 """
 PyLogLevels = {
     'None' : 0,
@@ -179,6 +180,10 @@ cdef addValueId(ValueID v, n):
     values_map.insert ( pair[uint64_t, ValueID] (v.GetId(), v))
 
 cdef void callback(const_notification _notification, void* _context) with gil:
+    """
+    Callback to the C++ library
+
+    """
     cdef Notification* notification = <Notification*>_notification
 
     n = {'notificationType' : PyNotifications[notification.GetType()],
@@ -191,6 +196,8 @@ cdef void callback(const_notification _notification, void* _context) with gil:
         n['event'] = notification.GetEvent()
     elif notification.GetType() == Type_Error:
         n['errorCode'] = notification.GetErrorCode()
+#    elif notification.GetType() in (Type_CreateButton, Type_DeleteButton, Type_ButtonOn, Type_ButtonOff):
+#        n['buttonId'] = notification.GetButtonId()
     addValueId(notification.GetValueID(), n)
     #print n
     (<object>_context)(n)
@@ -578,6 +585,7 @@ Calls to BeginControllerCommand will fail if the controller is not the primary.
 :param homeId: The Home ID of the Z-Wave controller.
 :type homeId: int
 :returns: bool -- True if it is a primary controller, False if not.
+:see: isBridgeController_, isStaticUpdateController_
 
         '''
         return self.manager.IsPrimaryController(homeid)
@@ -595,6 +603,7 @@ about network changes.
 :param homeId: The Home ID of the Z-Wave controller.
 :type homeId: int
 :returns: bool -- True if it is a static update controller, False if not.
+:see: isBridgeController_, isPrimaryController_
 
         '''
         return self.manager.IsStaticUpdateController(homeid)
@@ -611,6 +620,7 @@ with other controllers to enable events to be passed on.
 :param homeId: The Home ID of the Z-Wave controller.
 :type homeId: int
 :returns: bool -- True if it is a bridge controller, False if not.
+:see: isPrimaryController_, isStaticUpdateController_
 
         '''
         return self.manager.IsBridgeController(homeid)
@@ -624,7 +634,7 @@ Get the version of the Z-Wave API library used by a controller.
 :param homeId: The Home ID of the Z-Wave controller.
 :type homeId: int
 :returns: str -- A string containing the library version. For example, "Z-Wave 2.48".
-:see: getLibraryConfigPath_, getLibraryTypeName_, getPythonLibraryVersion_, getLibraryTypeName_
+:see: getPythonLibraryVersion_, getLibraryTypeName_
 
         '''
         cdef string c_string = self.manager.GetLibraryVersion(homeid)
@@ -637,7 +647,7 @@ Get the version of the Z-Wave API library used by a controller.
 Get the version of the python library.
 
 :returns: str -- A string containing the python library version. For example, "0.1".
-:see: getLibraryVersion_, getLibraryTypeName_, getLibraryConfigPath_, getLibraryTypeName_
+:see: getLibraryTypeName_, getLibraryVersion_
 
         '''
         return PYLIBRARY
@@ -665,7 +675,7 @@ method.
 :param homeId: The Home ID of the Z-Wave controller.
 :type homeId: int
 :returns: str -- A string containing the library type.
-:see: getLibraryVersion_, getPythonLibraryVersion_, getLibraryConfigPath_
+:see: getLibraryVersion_, getPythonLibraryVersion_
 
         '''
         cdef string c_string = self.manager.GetLibraryTypeName(homeid)
@@ -704,6 +714,7 @@ Send current driver statistics to the log file.
 Retrieve statistics from driver.
 
 Statistics:
+
         * s_SOFCnt : Number of SOF bytes received
         * s_ACKWaiting : Number of unsolicited messages while waiting for an ACK
         * s_readAborts : Number of times read were aborted due to timeouts
@@ -883,7 +894,8 @@ first run.
 :type homeId: int
 :param nodeId: The ID of the node to query.
 :type nodeId: int
-:returns: bool -- True if the request was sent successfully.
+:returns: True if the request was sent successfully.
+:rtype: bool
 
         '''
         return self.manager.RequestNodeDynamic(homeid, nodeid)
@@ -938,6 +950,7 @@ Get whether the node is a beam capable device.
 :param nodeId: The ID of the node to query.
 :type nodeId: int
 :returns: bool -- True if the node is a beaming device
+:see: isNodeListeningDevice_, isNodeFrequentListeningDevice_, isNodeSecurityDevice_, isNodeRoutingDevice_
 
         '''
         return self.manager.IsNodeBeamingDevice(homeid, nodeid)
@@ -954,6 +967,7 @@ Get whether the node is a setening device that does not go to sleep
 :param nodeId: The ID of the node to query.
 :type nodeId: int
 :returns: bool -- True if it is a setening node.
+:see: isNodeBeamingDevice_, isNodeFrequentListeningDevice_, isNodeSecurityDevice_, isNodeRoutingDevice_
 
         '''
         return self.manager.IsNodeListeningDevice(homeid, nodeid)
@@ -970,6 +984,7 @@ can be woken up by a beam. Useful to determine node and controller consistency.
 :param nodeId: The ID of the node to query.
 :type nodeId: int
 :returns: bool -- True if it is a frequent setening node.
+:see: isNodeBeamingDevice_, isNodeListeningDevice_, isNodeSecurityDevice_, isNodeRoutingDevice_
 
         '''
         return self.manager.IsNodeFrequentListeningDevice(homeid, nodeid)
@@ -985,6 +1000,7 @@ Get the security attribute for a node. True if node supports security features.
 :param nodeId: The ID of the node to query.
 :type nodeId: int
 :returns: bool -- True if security features implemented.
+:see: isNodeBeamingDevice_, isNodeListeningDevice_, isNodeFrequentListeningDevice_, isNodeRoutingDevice_
 
         '''
         return self.manager.IsNodeSecurityDevice(homeid, nodeid)
@@ -1000,6 +1016,7 @@ Get whether the node is a routing device that passes messages to other nodes
 :param nodeId: The ID of the node to query.
 :type nodeId: int
 :returns: bool -- True if the node is a routing device
+:see: isNodeBeamingDevice_, isNodeListeningDevice_, isNodeFrequentListeningDevice_, isNodeSecurityDevice_
 
         '''
         return self.manager.IsNodeRoutingDevice(homeid, nodeid)
@@ -1045,6 +1062,7 @@ Get the security byte for a node.  Bit meanings are still to be determined.
 :param nodeId: The ID of the node to query.
 :type nodeId: int
 :returns: int -- The node security byte
+:see: getNodeType_, getNodeSpecific_, getNodeGeneric_, getNodeBasic_
 
         '''
         return self.manager.GetNodeSecurity(homeid, nodeid)
@@ -1060,6 +1078,7 @@ Get the basic type of a node.
 :param nodeId: The ID of the node to query.
 :type nodeId: int
 :returns: int -- The node basic type.
+:see: getNodeType_, getNodeSpecific_, getNodeGeneric_, getNodeSecurity_
 
         '''
         return self.manager.GetNodeBasic(homeid, nodeid)
@@ -1075,6 +1094,7 @@ Get the generic type of a node.
 :param nodeId: The ID of the node to query.
 :type nodeId: int
 :returns: int -- The node generic type.
+:see: getNodeType_, getNodeSpecific_, getNodeBasic_, getNodeSecurity_
 
         '''
         return self.manager.GetNodeGeneric(homeid, nodeid)
@@ -1090,6 +1110,7 @@ Get the specific type of a node.
 :param nodeId: The ID of the node to query.
 :type homeId: int
 :returns: int -- The node specific type.
+:see: getNodeType_, getNodeGeneric_, getNodeBasic_, getNodeSecurity_
 
         '''
         return self.manager.GetNodeSpecific(homeid, nodeid)
@@ -1107,7 +1128,9 @@ on which of those values are specified by the node.
 :type homeId: int
 :param nodeId: The ID of the node to query.
 :type nodeId: int
-:returns: str -- A string containing the label text.
+:returns: A string containing the label text.
+:rtype: str
+:see: getNodeSpecific_, getNodeGeneric_, getNodeBasic_, getNodeSecurity_
 
         '''
         cdef string c_string = self.manager.GetNodeType(homeid, nodeid)
@@ -1118,22 +1141,6 @@ on which of those values are specified by the node.
 .. _getNodeNeighbors:
 
 Get the bitmap of this node's neighbors.
-
-    uint32_t GetNodeNeighbors( uint32_t const _homeId, uint8_t const _nodeId, uint8_t** _nodeNeighbors );
-    /**
-    * brief Get the bitmap of this node's neighbors
-    *
-    * param _homeId The Home ID of the Z-Wave controller that manages the node.
-    * param _nodeId The ID of the node to query.
-    * param _nodeNeighbors An array of 29 uint8s to hold the neighbor bitmap
-    */
-
-:todo:
-    cdef uint8_t* retuint8 = <uint8_t*>malloc(sizeof(uint8_t)*count)
-    How to free memory ? Create a child of set. 2 parameters : address of the
-    value and size. Sur le __del__ on "free" la memory
-    Fix ???
-    When no entries found, should we return an empty set or None
 
 :param homeId: The Home ID of the Z-Wave controller that manages the node.
 :type homeId: int
@@ -2377,12 +2384,30 @@ add a single watcher - all notifications will be reported to it.
 
 :param pythonfunc: Watcher pointer to a function that will be called by the notification system.
 :type pythonfunc: callback
-:see: removeWatcher_, notification_
+:see: removeWatcher_
 
         '''
         self._watcherCallback = pythonfunc # need to keep a reference to this
         if not self.manager.AddWatcher(callback, <void*>pythonfunc):
             raise ValueError("call to AddWatcher failed")
+
+    def removeWatcher(self, pythonfunc):
+        '''
+.. _removeWatcher:
+
+Remove a notification watcher.
+
+:param pythonfunc: Watcher pointer to a function
+:type pythonfunc: callback
+:see: addWatcher_
+
+        '''
+        if not self.manager.RemoveWatcher(callback, <void*>self._watcherCallback):
+            raise ValueError("call to RemoveWatcher failed")
+        else:
+            self._watcherCallback = None
+
+
 #
 # -----------------------------------------------------------------------------
 # Controller commands

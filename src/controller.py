@@ -267,3 +267,28 @@ class ZWaveController(ZWaveObject):
         if self.node.is_bridge_controller:
             caps.add('bridgeController')
         return caps
+
+    def hard_reset(self):
+        """
+        Hard Reset a PC Z-Wave Controller.
+        Resets a controller and erases its network configuration settings.  The
+        controller becomes a primary controller ready to add devices to a new network.
+
+        """
+        self._network.manager.resetController(self._network.home_id)
+        self._network.state = self.STATE_RESET
+
+    def soft_reset(self):
+        """
+        Soft Reset a PC Z-Wave Controller.
+        Resets a controller without erasing its network configuration settings.
+
+        """
+        self._network.manager.softResetController(self._network.home_id)
+
+    def cancel_command(self):
+        """
+        Cancels any in-progress command running on a controller.
+
+        """
+        self._network.manager.cancelControllerCommand(self._network.home_id)

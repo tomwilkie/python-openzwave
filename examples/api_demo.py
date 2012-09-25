@@ -48,8 +48,14 @@ from openzwave.network import ZWaveNetwork
 from openzwave.option import ZWaveOption
 import time
 
+device="/dev/zwave-aeon-s2"
+
+for arg in sys.argv:
+    if arg.startswith("--device"):
+        temp,device = arg.split("=")
+
 #Define some manager options
-options = ZWaveOption(device="/dev/zwave-aeon-s2", \
+options = ZWaveOption(device, \
   config_path="openzwave/config", \
   user_path=".", cmd_line="")
 options.set_log_file("OZW_Log.log")
@@ -81,8 +87,9 @@ if network.state<network.STATE_INITIALISED:
 print "------------------------------------------------------------"
 print "Use python library : %s" % network.controller.python_library_version
 print "Use openzwave library : %s" % network.controller.library_description
-print "Network home_id : %s" % network.home_id
-print "Controller node_id : %s" % network.controller.node.node_id
+print "Network home id : %s" % network.home_id
+print "Controller node id : %s" % network.controller.node.node_id
+print "Controller node version : %s" % (network.controller.node.version)
 print "Nodes in network : %s" % network.nodes_count
 print "------------------------------------------------------------"
 print "Waiting for network to become ready : "
@@ -116,6 +123,7 @@ for node in network.nodes:
     print "%s - Name : %s" % (network.nodes[node].node_id,network.nodes[node].name)
     print "%s - Manufacturer name / id : %s / %s" % (network.nodes[node].node_id,network.nodes[node].manufacturer_name, network.nodes[node].manufacturer_id)
     print "%s - Product name / id / type : %s / %s / %s" % (network.nodes[node].node_id,network.nodes[node].product_name, network.nodes[node].product_id, network.nodes[node].product_type)
+    print "%s - Version : %s" % (network.nodes[node].node_id, network.nodes[node].version)
     print "%s - Command classes : %s" % (network.nodes[node].node_id,network.nodes[node].command_classes_as_string)
     print "%s - Capabilities : %s" % (network.nodes[node].node_id,network.nodes[node].capabilities)
     print "%s - Neigbors : %s" % (network.nodes[node].node_id,network.nodes[node].neighbors)
@@ -157,3 +165,9 @@ print
 print "------------------------------------------------------------"
 print "Driver statistics : %s" % network.controller.stats
 print "------------------------------------------------------------"
+
+print
+print "------------------------------------------------------------"
+print "Write config to disk"
+print "------------------------------------------------------------"
+network.write_config()

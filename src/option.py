@@ -132,16 +132,17 @@ class ZWaveOption(libopenzwave.PyOptions):
 
         :param level:
         :type level: PyLogLevels
-            'None':"Disable all logging" /
-            'Always':"These messages should always be shown" /
-            'Fatal':"A likely fatal issue in the library" /
-            'Error':"A serious issue with the library or the network" /
-            'Warning':"A minor issue from which the library should be able to recover" /
-            'Alert':"Something unexpected by the library about which the controlling application should be aware" /
-            'Info':"Everything's working fine...these messages provide streamlined feedback on each message" /
-            'Detail':"Detailed information on the progress of each message" /
-            'Debug':"Very detailed information on progress that will create a huge log file quickly" /
-            'Internal':"Used only within the log class (uses existing timestamp, etc.)"
+
+            * 'None':"Disable all logging" /
+            * 'Always':"These messages should always be shown" /
+            * 'Fatal':"A likely fatal issue in the library" /
+            * 'Error':"A serious issue with the library or the network" /
+            * 'Warning':"A minor issue from which the library should be able to recover" /
+            * 'Alert':"Something unexpected by the library about which the controlling application should be aware" /
+            * 'Info':"Everything's working fine...these messages provide streamlined feedback on each message" /
+            * 'Detail':"Detailed information on the progress of each message" /
+            * 'Debug':"Very detailed information on progress that will create a huge log file quickly" /
+            * 'Internal':"Used only within the log class (uses existing timestamp, etc.)"
 
         '''
         return self.addOptionInt("SaveLogLevel", PyLogLevels[level])

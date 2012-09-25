@@ -26,6 +26,7 @@ help:
 	@echo "  htmlhelp   to make HTML files and a HTML help project"
 	@echo "  qthelp     to make HTML files and a qthelp project"
 	@echo "  devhelp    to make HTML files and a Devhelp project"
+	@echo "  joomla     to make HTML files in Joomla format"
 	@echo "  epub       to make an epub"
 	@echo "  latex      to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
 	@echo "  latexpdf   to make LaTeX files and run them through pdflatex"
@@ -89,6 +90,11 @@ devhelp:
 	@echo "# mkdir -p $$HOME/.local/share/devhelp/py-openzwave"
 	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/py-openzwave"
 	@echo "# devhelp"
+
+joomla:
+	$(SPHINXBUILD) -b html -D html_theme="joomla" $(ALLSPHINXOPTS) $(BUILDDIR)/joomla
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/joomla."
 
 epub:
 	$(SPHINXBUILD) -b epub $(ALLSPHINXOPTS) $(BUILDDIR)/epub
