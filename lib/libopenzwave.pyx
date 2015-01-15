@@ -29,7 +29,6 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from libc.stdint cimport uint16_t,  uint32_t, uint64_t, int32_t, int16_t, uint8_t, int8_t
 from mylibc cimport string
-from vers cimport ozw_vers_major, ozw_vers_minor, ozw_vers_revision
 from libc.stdlib cimport malloc, free
 from mylibc cimport PyEval_InitThreads
 from node cimport NodeData_t, NodeData
@@ -721,9 +720,9 @@ Retrieve controller interface type, Unknown, Serial, Hid
 :rtype: str
 
         '''
-        type = self.manager.GetControllerInterfaceType(homeid) 
+        type = self.manager.GetControllerInterfaceType(homeid)
         return PyControllerInterface[type]
-        
+
     def getControllerPath(self, homeid):
         '''
 .._getControllerPath:
@@ -855,30 +854,6 @@ Get the python library version number
 
         """
         return PYLIBRARY
-
-    def getOzwLibraryVersion(self):
-        """
-.. _getOzwLibraryVersion:
-
-Get a string containing the openzwave library version.
-
-:return: A string containing the library type.
-:rtype: str
-:see: getLibraryVersion_, getPythonLibraryVersion_, getLibraryTypeName_
-
-        """
-        return "OpenZWave version %d.%d.%d" %(ozw_vers_major, ozw_vers_minor, ozw_vers_revision)
-
-    def getOzwLibraryVersionNumber(self):
-        '''
-_getOzwLibraryVersionNumber: Get the openzwave library version number.
-
-:return: A string containing the library type.
-:rtype: str
-:see: getLibraryVersion_, getPythonLibraryVersion_, getLibraryTypeName_
-
-        '''
-        return "%d.%d.%d" %(ozw_vers_major, ozw_vers_minor, ozw_vers_revision)
 
     def getLibraryTypeName(self, homeid):
         '''
@@ -1037,7 +1012,7 @@ Try to heal node by requesting neighbor update and optional route update.
 :see: healNetwork_
         '''
         self.manager.HealNetworkNode(homeid, nodeid,  upNodeRoute)
-    
+
     def healNetwork(self, homeid, upNodeRoute = False):
         '''
 .. _healNetwork:

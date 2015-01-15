@@ -30,72 +30,14 @@ import glob
 import os
 import sys
 
-DEBIAN_PACKAGE = False
-filtered_args = []
-
-for arg in sys.argv:
-    if arg == "--debian-package":
-        DEBIAN_PACKAGE = True
-    else:
-        filtered_args.append(arg)
-sys.argv = filtered_args
-
-def _getDirs(base):
-    return [x for x in glob.iglob(os.path.join( base, '*')) if os.path.isdir(x) ]
-
-def data_files_config(target, source, pattern):
-    ret = list()
-    tup = list()
-    tup.append(target)
-    tup.append(glob.glob(os.path.join(source,pattern)))
-    #print tup
-    ret.append(tup)
-    dirs = _getDirs(source)
-    if len(dirs):
-        for d in dirs:
-            #print os.path.abspath(d)
-            rd = d.replace(source+os.sep, "", 1)
-            #print target,rd
-            #print os.path.join(target,rd)
-            ret.extend(data_files_config(os.path.join(target,rd), \
-                os.path.join(source,rd), pattern))
-    return ret
-
-data_files = data_files_config('share/python-openzwave/config','openzwave/config','*.xml')
-data_files.extend(data_files_config('share/python-openzwave/config','openzwave/config','*.xsd'))
-
-cmdclass = { }
-ext_modules = [ ]
-
-if os_name == 'nt':
-    ext_modules = [extension.Extension("libopenzwave", ["lib/libopenzwave.pyx"],
-                             libraries=['setupapi', 'stdc++'],
-                             language="c++",
-                             extra_objects=['openzwave/libopenzwave.a'],
-                             include_dirs=['openzwave/cpp/src', 'openzwave/cpp/src/value_classes', 'openzwave/cpp/src/platform', 'openzwave/cpp/build/windows']
-    )]
-elif platform_system() == 'Darwin':
-    ext_modules = [Extension("libopenzwave", ["lib/libopenzwave.pyx"],
-                             libraries=['stdc++'],
-                             language="c++",
-                             extra_link_args=['-framework', 'CoreFoundation', '-framework', 'IOKit'],
-                             extra_objects=['openzwave/libopenzwave.a'],
-                             include_dirs=['openzwave/cpp/src', 'openzwave/cpp/src/value_classes', 'openzwave/cpp/src/platform', 'openzwave/cpp/build/mac']
-    )]
-elif DEBIAN_PACKAGE == True:
-    ext_modules = [Extension("libopenzwave", ["lib/libopenzwave.pyx"],
-                             libraries=['udev', 'stdc++', 'openzwave'],
-                             language="c++",
-                             extra_objects=['/usr/libopenzwave.a'],
-                             include_dirs=['/usr/include/openzwave', '/usr/include/openzwave/value_classes', '/usr/include/openzwave/platform']
-    )]
-else:
-    ext_modules = [extension.Extension("libopenzwave", ["lib/libopenzwave.pyx"],
-                             libraries=['udev', 'stdc++'],
-                             language="c++",
-                             extra_objects=['openzwave/libopenzwave.a'],
-                             include_dirs=['openzwave/cpp/src', 'openzwave/cpp/src/value_classes', 'openzwave/cpp/src/platform', 'openzwave/cpp/build/linux']
-    )]
+ext_modules = [
+  extension.Extension(
+    "libopenzwave", ["lib/libopenzwave.pyx"],
+    libraries=['udev', 'stdc++', 'openzwave'],
+    language="c++",
+    extra_objects=['/usr/local/lib/libopenzwave.so'],
+    include_dirs=['/usr/local/include/openzwave', '/usr/local/include/openzwave/value_classes', '/usr/local/include/openzwave/platform'])
+]
 
 setup(
   name = 'python-openzwave-lib',
@@ -107,6 +49,6 @@ setup(
   ext_modules = ext_modules,
   package_dir = {'libopenzwave' : 'lib'},
   #The following line install config drectory in share/python-openzwave
-  data_files = data_files,
+  data_files = [],
   packages = ['libopenzwave']
 )
