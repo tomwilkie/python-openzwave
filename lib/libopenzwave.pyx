@@ -269,15 +269,22 @@ cdef getValueFromType(Manager *manager, valueId):
     return ret
 
 cdef addValueId(ValueID v, n):
-    #cdef string value
-    cdef string label
-    cdef string units
+    cdef string label = string('')
+    cdef string units = string('')
+    value = None
+    cdef bool read_only = True
+
     cdef Manager *manager = Get()
     #logging.debug("libopenzwave.addValueId (CMD,n)=(%s,%s)" % (PyManager.COMMAND_CLASS_DESC[v.GetCommandClassId()],n))
     #manager.GetValueAsString(v, &value)
     values_map.insert ( pair[uint64_t, ValueID] (v.GetId(), v))
-    label = manager.GetValueLabel(v)
-    units = manager.GetValueUnits(v)
+
+    if v.GetInstance() != 0:
+      label = manager.GetValueLabel(v)
+      units = manager.GetValueUnits(v)
+      value = getValueFromType(manager,v.GetId())
+      read_only = manager.IsValueReadOnly(v)
+
     n['valueId'] = {'homeId' : v.GetHomeId(),
                     'nodeId' : v.GetNodeId(),
                     'commandClass' : PyManager.COMMAND_CLASS_DESC[v.GetCommandClassId()],
@@ -286,11 +293,10 @@ cdef addValueId(ValueID v, n):
                     'id' : v.GetId(),
                     'genre' : PyGenres[v.GetGenre()],
                     'type' : PyValueTypes[v.GetType()],
-#                    'value' : value.c_str(),
-                    'value' : getValueFromType(manager,v.GetId()),
+                    'value' : value,
                     'label' : label.c_str(),
                     'units' : units.c_str(),
-                    'readOnly': manager.IsValueReadOnly(v),
+                    'readOnly': read_only,
                     }
 
 cdef void notif_callback(const_notification _notification, void* _context) with gil:
