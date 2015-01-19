@@ -29,7 +29,6 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from libc.stdint cimport uint16_t,  uint32_t, uint64_t, int32_t, int16_t, uint8_t, int8_t
 from mylibc cimport string
-from vers cimport ozw_vers_major, ozw_vers_minor, ozw_vers_revision
 from libc.stdlib cimport malloc, free
 from mylibc cimport PyEval_InitThreads
 from node cimport NodeData_t, NodeData
@@ -284,15 +283,22 @@ cdef getValueFromType(Manager *manager, valueId) except+ MemoryError:
     return ret
 
 cdef addValueId(ValueID v, n):
-    #cdef string value
-    cdef string label
-    cdef string units
+    cdef string label = string('')
+    cdef string units = string('')
+    value = None
+    cdef bool read_only = True
+
     cdef Manager *manager = Get()
     #logging.debug("libopenzwave.addValueId (CMD,n)=(%s,%s)" % (PyManager.COMMAND_CLASS_DESC[v.GetCommandClassId()],n))
     #manager.GetValueAsString(v, &value)
     values_map.insert ( pair[uint64_t, ValueID] (v.GetId(), v))
-    label = manager.GetValueLabel(v)
-    units = manager.GetValueUnits(v)
+
+    if v.GetInstance() != 0:
+      label = manager.GetValueLabel(v)
+      units = manager.GetValueUnits(v)
+      value = getValueFromType(manager,v.GetId())
+      read_only = manager.IsValueReadOnly(v)
+
     n['valueId'] = {'homeId' : v.GetHomeId(),
                     'nodeId' : v.GetNodeId(),
                     'commandClass' : PyManager.COMMAND_CLASS_DESC[v.GetCommandClassId()],
@@ -301,11 +307,10 @@ cdef addValueId(ValueID v, n):
                     'id' : v.GetId(),
                     'genre' : PyGenres[v.GetGenre()],
                     'type' : PyValueTypes[v.GetType()],
-#                    'value' : value.c_str(),
-                    'value' : getValueFromType(manager,v.GetId()),
+                    'value' : value,
                     'label' : label.c_str(),
                     'units' : units.c_str(),
-                    'readOnly': manager.IsValueReadOnly(v),
+                    'readOnly': read_only,
                     }
 
 cdef void notif_callback(const_notification _notification, void* _context) with gil:
@@ -735,9 +740,9 @@ Retrieve controller interface type, Unknown, Serial, Hid
 :rtype: str
 
         '''
-        type = self.manager.GetControllerInterfaceType(homeid) 
+        type = self.manager.GetControllerInterfaceType(homeid)
         return PyControllerInterface[type]
-        
+
     def getControllerPath(self, homeid):
         '''
 .._getControllerPath:
@@ -869,30 +874,6 @@ Get the python library version number
 
         """
         return PYLIBRARY
-
-    def getOzwLibraryVersion(self):
-        """
-.. _getOzwLibraryVersion:
-
-Get a string containing the openzwave library version.
-
-:return: A string containing the library type.
-:rtype: str
-:see: getLibraryVersion_, getPythonLibraryVersion_, getLibraryTypeName_
-
-        """
-        return "OpenZWave version %d.%d.%d" %(ozw_vers_major, ozw_vers_minor, ozw_vers_revision)
-
-    def getOzwLibraryVersionNumber(self):
-        '''
-_getOzwLibraryVersionNumber: Get the openzwave library version number.
-
-:return: A string containing the library type.
-:rtype: str
-:see: getLibraryVersion_, getPythonLibraryVersion_, getLibraryTypeName_
-
-        '''
-        return "%d.%d.%d" %(ozw_vers_major, ozw_vers_minor, ozw_vers_revision)
 
     def getLibraryTypeName(self, homeid):
         '''
@@ -1051,7 +1032,7 @@ Try to heal node by requesting neighbor update and optional route update.
 :see: healNetwork_
         '''
         self.manager.HealNetworkNode(homeid, nodeid,  upNodeRoute)
-    
+
     def healNetwork(self, homeid, upNodeRoute = False):
         '''
 .. _healNetwork:
